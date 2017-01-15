@@ -1,0 +1,9 @@
+/.idea/
+/logs/
+!/files/.gitkeep
+/files/
+
+/vendor/
+
+/composer.phar
+*.iml
