@@ -4,11 +4,10 @@ require __DIR__.'/../vendor/autoload.php';
 
 use Silex\Application as SilexApplication;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\ProcessBuilder;
-use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Process\ExecutableFinder;
 
 $app = new SilexApplication();
 $app['debug'] = 1;
@@ -33,7 +32,12 @@ $app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwi
     /** @var \Imagine\Image\AbstractImagine $imagine */
     $imagine = $app['imagine'];
 
-    $wkHtmlBinary = __DIR__.'/../vendor/h4cc/wkhtmltoimage-amd64/bin/wkhtmltoimage-amd64';
+    $finder = new ExecutableFinder();
+    $wkHtmlBinary = $finder->find('wkhtmltoimage');
+
+    if (empty($wkHtmlBinary)) {
+        $wkHtmlBinary = __DIR__.'/../vendor/h4cc/wkhtmltoimage-amd64/bin/wkhtmltoimage-amd64';
+    }
 
     $url = $request->server->get('QUERY_STRING');
     if (!$url) {
@@ -69,6 +73,11 @@ $app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwi
         $arguments[] = '--height';
         $arguments[] = $height;
     }
+    $arguments[] = '--enable-plugins';
+    $arguments[] = '--use-xserver';
+
+    $arguments[] = '--load-error-handling';
+    $arguments[] = 'ignore';
 
     $arguments[] = $url;
 
