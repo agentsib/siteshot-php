@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<h1>Siteshot</h1>
+
+<p><b>Usage</b></p>
+<pre>
+    http://siteshot.dev/{mode}/{sizes}/{fwidth}/{format}/{timeout}?{url}
+</pre>
+<p><b>mode</b> - <i>corner</i> or <i>resize</i></p>
+<p><b>sizes</b> - screenshot size (for example <i>400</i> or <i>400x500</i>)</p>
+<p><b>fwidth</b> - for <i>corner</i> - crop box width and height, for <i>resize</i> - max width </p>
+<p><b>format</b> - <i>png</i> or <i>jpg</i></p>
+<p><b>timeout</b> - wait time for load page content (by default: 1). Example: <i>t1</i> or <i>t10</i></p>
+<p><b>url</b> - url for capture</p>
+<p>------</p>
+<p><b>Examples</b></p>
+<pre>
+http://siteshot.dev/resize/800x600/400/png?http://google.com
+http://siteshot.dev/resize/800x600/400/png/t5?http://speedtest.net
+http://siteshot.dev/corner/800x600/400/png?http://vk.com
+</pre>
+</body>
+</html>

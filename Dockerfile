@@ -53,6 +53,7 @@ RUN cd /var/www/shot && \
 USER root
 
 ENV DISPLAY :99
+ENV DEBUG 0
 
 EXPOSE 80
 

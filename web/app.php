@@ -5,12 +5,14 @@ require __DIR__.'/../vendor/autoload.php';
 use Silex\Application as SilexApplication;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Process\ProcessBuilder;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\ExecutableFinder;
+use Imagine\Image\Point;
+use Imagine\Image\Box;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 $app = new SilexApplication();
-$app['debug'] = 1;
+$app['debug'] = getenv("DEBUG") == 1;
 
 if (class_exists('\Gmagick')) {
     $app['imagine.driver'] = 'Gmagick';
@@ -23,14 +25,22 @@ $classname = sprintf('Imagine\%s\Imagine', $app['imagine.driver']);
 
 $app['imagine'] = new $classname;
 
-$app->get('/', function(Request $request) {
-    return 'Hi!';
-});
-/*
-*/
-$app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwidth, $format) use ($app) {
-    /** @var \Imagine\Image\AbstractImagine $imagine */
-    $imagine = $app['imagine'];
+$app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600, $timeout = 1, $format = 'png') {
+
+    if (!$width) {
+        $width = 800;
+    }
+    $width = max(250, $width);
+    $width = min(1920, $width);
+    if (!$height) {
+        $height = 600;
+    }
+    $height = max(250, $height);
+    $height = min(1920, $height);
+    $pars = parse_url($url);
+    if (!isset($pars['scheme']) || !in_array($pars['scheme'], ['http', 'https'])) {
+        throw new NotFoundHttpException('Wrong schema');
+    }
 
     $finder = new ExecutableFinder();
     $wkHtmlBinary = $finder->find('wkhtmltoimage');
@@ -38,31 +48,6 @@ $app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwi
     if (empty($wkHtmlBinary)) {
         $wkHtmlBinary = __DIR__.'/../vendor/h4cc/wkhtmltoimage-amd64/bin/wkhtmltoimage-amd64';
     }
-
-    $url = $request->server->get('QUERY_STRING');
-    if (!$url) {
-        throw new NotFoundHttpException('Empty url');
-    }
-
-    $pars = parse_url($url);
-    if (!isset($pars['scheme']) || !in_array($pars['scheme'], ['http', 'https'])) {
-        return new NotFoundHttpException('Wrong schema');
-    }
-
-
-    $sizes = explode('x', $sizes);
-    $width = 0;
-    $height = 0;
-    if (count($sizes) == 1) {
-        $width = $sizes[0];
-    } else {
-        list($width, $height) = $sizes;
-    }
-
-    $width = min($width, 1980);
-    $height = min($height, 1980);
-
-    $width = max($width, 1024);
 
     $arguments = [$wkHtmlBinary];
     if ($width) {
@@ -73,39 +58,89 @@ $app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwi
         $arguments[] = '--height';
         $arguments[] = $height;
     }
+
     $arguments[] = '--enable-plugins';
     $arguments[] = '--use-xserver';
+
+    $arguments[] = '--javascript-delay';
+    $arguments[] = intval($timeout);
 
     $arguments[] = '--load-error-handling';
     $arguments[] = 'ignore';
 
     $arguments[] = $url;
 
-    $file = __DIR__.'/../cache/'.md5($url.implode('x', $sizes).$fwidth).'.'.$format;
+    // For future cache
+    $file = __DIR__.'/../cache/'.md5(implode('_', [$url, $width, $height])).'.'.$format;
 
     $arguments[] = $file;
 
-//    if (file_exists($file)) {
-//        return new BinaryFileResponse($file);
-//    }
-
     $process = ProcessBuilder::create($arguments)->getProcess();
 
-    $ret = $process->run();
+
+    $process->run();
 
     if (!file_exists($file)) {
-        throw new NotFoundHttpException(' Error! ' );
+        throw new NotFoundHttpException('Create screenshot exception');
     }
+
+    return $file;
+});
+
+
+
+$app->get('/', function(Request $request) {
+    return new BinaryFileResponse(__DIR__.'/usage.html');
+});
+
+
+$app->get('/{mode}/{sizes}/{fwidth}/{format}/{timeout}', function(Request $request, $mode = 'resize', $sizes, $fwidth, $format, $timeout) use ($app) {
+    /** @var \Imagine\Image\AbstractImagine $imagine */
+    $imagine = $app['imagine'];
+
+    $url = $request->server->get('QUERY_STRING');
+    if (!$url) {
+        throw new NotFoundHttpException('Empty url');
+    }
+
+    $sizes = explode('x', $sizes);
+    $width = 0;
+    $height = 0;
+    if (count($sizes) == 1) {
+        $width = $sizes[0];
+    } else {
+        list($width, $height) = $sizes;
+    }
+
+    $screenFile = new \SplFileInfo($app['screenshot']($url, $width, $height, substr($timeout, 1), $format));
+
+    $file = $screenFile->getRealPath();
+
+    $image = $imagine->open($file);
 
     if ($width > $fwidth) {
-        $image = $imagine->open($file);
-        $image->resize($image->getSize()->widen($fwidth))->save();
+        switch ($mode) {
+            case 'resize':
+                $image->resize($image->getSize()->widen($fwidth));
+                break;
+            case 'corner':
+                $image->crop(new Point(0, 0), new Box($fwidth, $fwidth));
+                break;
+        }
+
     }
 
+    $raw = $image->get($format);
 
+    $response = new \Symfony\Component\HttpFoundation\Response($raw);
+    $response->headers->set('Content-Type', 'image/'.$format);
 
-    return new BinaryFileResponse($file);
+    return $response;
 })
+    ->value('timeout', 't1')
+    ->value('mode', 'resize')
+    ->assert('mode', 'corner|resize')
+    ->assert('timeout', 't\d+')
     ->assert('sizes', '\d+|\d+x\d+')
     ->assert('width', '\d+')
     ->assert('format', 'jpg|png');
