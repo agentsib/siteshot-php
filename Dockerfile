@@ -4,8 +4,8 @@ MAINTAINER Ilya Kovalenko <agentsib@gmail.com>
 RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y wget wkhtmltopdf vim cabextract libmspack0 xfonts-75dpi xvfb flashplugin-installer xz-utils curl supervisor git \
-    php php-fpm php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
+    apt-get install -y wget wkhtmltopdf vim cabextract libmspack0 xfonts-75dpi xvfb flashplugin-installer xz-utils curl supervisor git unzip \
+    php php-fpm php-zip php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
     apt-get -y remove wkhtmltopdf && \
     wget http://ftp.de.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.6_all.deb && \
     dpkg -i ttf-mscorefonts-installer_3.6_all.deb && \
