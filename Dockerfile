@@ -4,7 +4,7 @@ MAINTAINER Ilya Kovalenko <agentsib@gmail.com>
 RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y wget wkhtmltopdf vim cabextract libmspack0 xfonts-75dpi xvfb flashplugin-installer xz-utils curl supervisor \
+    apt-get install -y wget wkhtmltopdf vim cabextract libmspack0 xfonts-75dpi xvfb flashplugin-installer xz-utils curl supervisor git \
     php php-fpm php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
     apt-get -y remove wkhtmltopdf && \
     wget http://ftp.de.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.6_all.deb && \
@@ -37,7 +37,11 @@ ADD docker_files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD docker_files/apache-host.conf /etc/apache2/sites-available/000-default.conf
 
 ADD web /var/www/shot/web
+ADD composer.json /var/www/shot/composer.json
+ADD composer.lock /var/www/shot/composer.lock
+
 #ADD vendor /var/www/shot/vendor
+RUN chown -R www-data /var/www
 
 USER www-data
 
@@ -52,6 +56,7 @@ ENV DISPLAY :99
 
 EXPOSE 80
 
+WORKDIR /var/www/shot
 VOLUME /var/www/shot/cache
 
 ENTRYPOINT ["/entrypoint.sh"]
