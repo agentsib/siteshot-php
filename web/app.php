@@ -104,7 +104,7 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 
     $process->run();
 
-    if (!file_exists($file) || strpos($process->getErrorOutput(), 'network error') !== false) {
+    if (!file_exists($file) || strpos($process->getErrorOutput(), 'network error: HostNotFoundError') !== false) {
         throw new NotFoundHttpException('Screen shot not created');
     }
 
