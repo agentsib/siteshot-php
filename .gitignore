@@ -1,7 +1,7 @@
 /.idea/
 /logs/
-!/files/.gitkeep
-/files/
+!/cache/.gitkeep
+/cache/
 
 /vendor/
 

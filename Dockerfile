@@ -43,7 +43,7 @@ ENV DISPLAY :99
 
 EXPOSE 80
 
-# VOLUME /var/www/shot/cache
+VOLUME /var/www/shot/cache
 
 ENTRYPOINT ["/entrypoint.sh"]
 

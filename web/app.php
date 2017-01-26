@@ -81,13 +81,13 @@ $app->get('/{sizes}/{fwidth}/{format}/', function(Request $request, $sizes, $fwi
 
     $arguments[] = $url;
 
-    $file = __DIR__.'/../files/'.md5($url.implode('x', $sizes).$fwidth).'.'.$format;
+    $file = __DIR__.'/../cache/'.md5($url.implode('x', $sizes).$fwidth).'.'.$format;
 
     $arguments[] = $file;
 
-    if (file_exists($file)) {
-        return new BinaryFileResponse($file);
-    }
+//    if (file_exists($file)) {
+//        return new BinaryFileResponse($file);
+//    }
 
     $process = ProcessBuilder::create($arguments)->getProcess();
 
