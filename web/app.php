@@ -60,7 +60,12 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
         $arguments[] = $height;
     }
 
-    $arguments[] = '--enable-plugins';
+    if (getenv('ENABLE_PLUGINS') == 1) {
+        $arguments[] = '--enable-plugins';
+    } else {
+        $arguments[] = '--disable-plugins';
+    }
+
     $arguments[] = '--use-xserver';
 
     $arguments[] = '--javascript-delay';
@@ -69,8 +74,8 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 //    $arguments[] = '--stop-slow-scripts';
     $arguments[] = '--no-stop-slow-scripts';
 
-//    $arguments[] = '--load-error-handling';
-//    $arguments[] = 'skip';
+    $arguments[] = '--load-error-handling';
+    $arguments[] = 'ignore';
 
     $arguments[] = '--load-media-error-handling';
     $arguments[] = 'skip';
@@ -99,7 +104,7 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 
     $process->run();
 
-    if (!file_exists($file)) {
+    if (!file_exists($file) || strpos($process->getErrorOutput(), 'network error') !== false) {
         throw new NotFoundHttpException('Screen shot not created');
     }
 
