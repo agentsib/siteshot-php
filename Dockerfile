@@ -38,11 +38,15 @@ ADD docker_files/apache-host.conf /etc/apache2/sites-available/000-default.conf
 
 ADD web /var/www/shot/web
 #ADD vendor /var/www/shot/vendor
+
+USER www-data
+
 RUN cd /var/www/shot && \
     curl -o installer http://getcomposer.org/installer && \
     php installer && \
     rm installer && \
     php composer.phar install
+USER root
 
 ENV DISPLAY :99
 
