@@ -10,6 +10,7 @@ use Symfony\Component\Process\ExecutableFinder;
 use Imagine\Image\Point;
 use Imagine\Image\Box;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 $app = new SilexApplication();
 $app['debug'] = getenv("DEBUG") == 1;
@@ -63,15 +64,31 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
     $arguments[] = '--use-xserver';
 
     $arguments[] = '--javascript-delay';
-    $arguments[] = intval($timeout);
+    $arguments[] = intval($timeout).'000';
 
-    $arguments[] = '--load-error-handling';
-    $arguments[] = 'ignore';
+//    $arguments[] = '--stop-slow-scripts';
+    $arguments[] = '--no-stop-slow-scripts';
+
+//    $arguments[] = '--load-error-handling';
+//    $arguments[] = 'skip';
+
+    $arguments[] = '--load-media-error-handling';
+    $arguments[] = 'skip';
+
+    $arguments[] = '--custom-header-propagation';
+    $arguments[] = '--custom-header';
+    $arguments[] = 'User-Agent';
+    $arguments[] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36';
+
 
     $arguments[] = $url;
 
     // For future cache
     $file = __DIR__.'/../cache/'.md5(implode('_', [$url, $width, $height])).'.'.$format;
+
+    if (file_exists($file)) {
+        unlink($file);
+    }
 
     $arguments[] = $file;
 
@@ -81,12 +98,17 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
     $process->run();
 
     if (!file_exists($file)) {
-        throw new NotFoundHttpException('Create screenshot exception');
+        throw new NotFoundHttpException('Screen shot not created');
     }
 
     return $file;
 });
 
+if (!$app['debug']) {
+    $app->error(function(HttpException $e){
+        return $e->getMessage();
+    });
+}
 
 
 $app->get('/', function(Request $request) {
@@ -137,7 +159,7 @@ $app->get('/{mode}/{sizes}/{fwidth}/{format}/{timeout}', function(Request $reque
 
     return $response;
 })
-    ->value('timeout', 't1')
+    ->value('timeout', 't5')
     ->value('mode', 'resize')
     ->assert('mode', 'corner|resize')
     ->assert('timeout', 't\d+')

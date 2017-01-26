@@ -12,6 +12,6 @@ And try http://localhost:8080/
 
 
 ```bash
-docker run -ti -p 8080:80 -v /path/to/siteshot-php:/var/www/shot agentsib/siteshot:latest
+docker run -ti -p 8080:80 -e DEBUG=1 -v /path/to/siteshot-php:/var/www/shot agentsib/siteshot:latest
 
 ```
