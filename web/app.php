@@ -75,6 +75,8 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
     $arguments[] = '--load-media-error-handling';
     $arguments[] = 'skip';
 
+    $arguments[] = '--disable-smart-width';
+
     $arguments[] = '--custom-header-propagation';
     $arguments[] = '--custom-header';
     $arguments[] = 'User-Agent';
