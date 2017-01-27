@@ -1,3 +1,5 @@
+[![Docker Automated buil](https://img.shields.io/docker/automated/agentsib/siteshot.svg)](https://hub.docker.com/r/agentsib/siteshot/)
+
 # Screenshot sites tool 
 
 Web service to generate images of websites. Written with Silex framework. Uses [wkhtmltopdf](http://wkhtmltopdf.org/).
