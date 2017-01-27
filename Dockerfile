@@ -3,17 +3,21 @@ MAINTAINER Ilya Kovalenko <agentsib@gmail.com>
 
 RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
+    echo 'deb http://archive.ubuntu.com/ubuntu/ xenial multiverse' >> /etc/apt/sources.list && \
+    echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial multiverse' >> /etc/apt/sources.list && \
     apt-get update && \
     # LATEST SYSTEM UPDATES
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes dist-upgrade && \
-    apt-get install -y wget wkhtmltopdf vim cabextract ttf-mscorefonts-installer libmspack0 xfonts-75dpi xvfb xz-utils curl supervisor git unzip \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y wget vim cabextract ttf-mscorefonts-installer libmspack0 xfonts-75dpi xvfb xz-utils curl supervisor git unzip \
     php php-fpm php-zip php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
-    # FLASH SUPPORT
-    apt-get -y install flashplugin-installer && \
-    # WKHTMLTOPDF
     # Get wkhtmltopdf dependencies
-    #apt-get install wkhtmltopdf && \
-    #apt-get -y remove wkhtmltopdf && \
+#    apt-get -y install wkhtmltopdf && \
+#    apt-get -y remove wkhtmltopdf && \
+    # FLASH SUPPORT
+    DEBIAN_FRONTEND=noninteractive apt-get -y install flashplugin-installer && \
+    # WKHTMLTOPDF
+    # SYSTEM
+    DEBIAN_FRONTEND=noninteractive apt-get -y install wkhtmltopdf && \
     # LATEST
 #    wget http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz && \
 #    tar xfv wkhtmltox-0.12.4_linux-generic-amd64.tar.xz && \
@@ -51,6 +55,7 @@ RUN cd /var/www/shot && \
     php installer && \
     rm installer && \
     php composer.phar install
+
 USER root
 
 ENV DISPLAY :99
