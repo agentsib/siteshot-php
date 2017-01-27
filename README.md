@@ -1,6 +1,6 @@
 # Screenshot sites tool 
 
-Web service to generate images of websites. Uses [wkhtmltopdf](http://wkhtmltopdf.org/).
+Web service to generate images of websites. Written with Symfony framework. Uses [wkhtmltopdf](http://wkhtmltopdf.org/).
 
 ## Running
 
@@ -33,7 +33,7 @@ http://siteshot.dev/resize/800x600/400/png/t5?http://speedtest.net
 
 http://siteshot.dev/corner/800x600/400/png?http://vk.com
 
-## Debug
+## Development
 
 Show symfony errors:
 
