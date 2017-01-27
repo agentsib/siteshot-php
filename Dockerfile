@@ -8,8 +8,11 @@ RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /
     apt-get update && \
     # LATEST SYSTEM UPDATES
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes dist-upgrade && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y wget vim cabextract ttf-mscorefonts-installer libmspack0 xfonts-75dpi xvfb xz-utils curl supervisor git unzip \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https wget vim cabextract libmspack0 xfonts-75dpi xvfb xz-utils curl supervisor git unzip \
     php php-fpm php-zip php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
+    # mscorefonts: license should be accepted to download fonts; apt-transport-https is used for downloads
+    echo 'ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true' | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && \
     # Get wkhtmltopdf dependencies
 #    apt-get -y install wkhtmltopdf && \
 #    apt-get -y remove wkhtmltopdf && \
