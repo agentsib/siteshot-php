@@ -3,15 +3,21 @@ MAINTAINER Ilya Kovalenko <agentsib@gmail.com>
 
 RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
     echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /etc/apt/sources.list && \
+    echo 'deb http://archive.ubuntu.com/ubuntu/ xenial multiverse' >> /etc/apt/sources.list && \
+    echo 'deb-src http://archive.ubuntu.com/ubuntu/ xenial multiverse' >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y wget wkhtmltopdf vim cabextract libmspack0 xfonts-75dpi xvfb flashplugin-installer xz-utils curl supervisor git unzip \
+    # LATEST SYSTEM UPDATES
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes dist-upgrade && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y wget vim cabextract ttf-mscorefonts-installer libmspack0 xfonts-75dpi xvfb xz-utils curl supervisor git unzip \
     php php-fpm php-zip php-imagick libapache2-mod-php apache2 libapache2-mod-rpaf libapache2-mod-xsendfile && \
-    apt-get -y remove wkhtmltopdf && \
-    wget http://ftp.de.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.6_all.deb && \
-    dpkg -i ttf-mscorefonts-installer_3.6_all.deb && \
-    rm ttf-mscorefonts-installer_3.6_all.deb && \
+    # Get wkhtmltopdf dependencies
+#    apt-get -y install wkhtmltopdf && \
+#    apt-get -y remove wkhtmltopdf && \
+    # FLASH SUPPORT
+    DEBIAN_FRONTEND=noninteractive apt-get -y install flashplugin-installer && \
+    # WKHTMLTOPDF
     # SYSTEM
-    apt-get install wkhtmltopdf && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y install wkhtmltopdf && \
     # LATEST
 #    wget http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz && \
 #    tar xfv wkhtmltox-0.12.4_linux-generic-amd64.tar.xz && \
@@ -31,7 +37,6 @@ RUN echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-security multiverse' >> /
      apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
      a2enmod rewrite
 
-
 ADD docker_files/entrypoint.sh /entrypoint.sh
 ADD docker_files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD docker_files/apache-host.conf /etc/apache2/sites-available/000-default.conf
@@ -46,10 +51,11 @@ RUN chown -R www-data /var/www
 USER www-data
 
 RUN cd /var/www/shot && \
-    curl -o installer http://getcomposer.org/installer && \
+    curl -o installer https://getcomposer.org/installer && \
     php installer && \
     rm installer && \
     php composer.phar install
+
 USER root
 
 ENV DISPLAY :99
