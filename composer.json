@@ -1,12 +1,14 @@
 {
-    "name": "agentsib/shot",
-    "description": "Site shot",
+    "name": "agentsib/siteshot",
+    "description": "Screenshot sites tool",
+    "keywords": ["screenshot", "htmltoimage", "thumbnail"],
     "type": "project",
     "license": "MIT",
     "authors": [
         {
             "name": "AgentSIB",
-            "email": "agentsib@gmail.com"
+            "email": "agentsib@gmail.com",
+            "homepage": "https://agentsib.ru"
         }
     ],
     "require": {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7455eb2bd14172a782389b01154d457",
+    "content-hash": "025097403b2baf5e94e782f7ddbe3f5f",
     "packages": [
         {
             "name": "h4cc/wkhtmltoimage-amd64",
