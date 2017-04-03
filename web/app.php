@@ -101,6 +101,10 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 
     $process = ProcessBuilder::create($arguments)->getProcess();
 
+    $processWaitTime = intval(getenv('PROCESS_WAIT_TIME'));
+    if ($processWaitTime > 0) {
+        $process->setTimeout(intval($timeout) + $processWaitTime);
+    }
 
     $process->run();
 
