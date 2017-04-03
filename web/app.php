@@ -4,6 +4,8 @@ require __DIR__.'/../vendor/autoload.php';
 
 use Silex\Application as SilexApplication;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\ExecutableFinder;
@@ -106,7 +108,11 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
         $process->setTimeout(intval($timeout) + $processWaitTime);
     }
 
-    $process->run();
+    try {
+        $process->run();
+    } catch (ProcessTimedOutException $e) {
+        throw new UnprocessableEntityHttpException('Process timeout', $e);
+    }
 
     if (!file_exists($file)) {
         throw new NotFoundHttpException('Screen shot not created');
