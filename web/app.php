@@ -47,12 +47,21 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 
     $finder = new ExecutableFinder();
     $wkHtmlBinary = $finder->find('wkhtmltoimage');
+    $timeoutBinnary = $finder->find('timeout');
 
     if (empty($wkHtmlBinary)) {
         $wkHtmlBinary = __DIR__.'/../vendor/h4cc/wkhtmltoimage-amd64/bin/wkhtmltoimage-amd64';
     }
 
+
     $arguments = [$wkHtmlBinary];
+    $processWaitTime = intval(getenv('PROCESS_WAIT_TIME'));
+
+
+    if ($timeoutBinnary && $processWaitTime) {
+        $arguments = array_merge([$timeoutBinnary, '--preserve-status', '-s', 'KILL', $processWaitTime.'s'], $arguments);
+    }
+
     if ($width) {
         $arguments[] = '--width';
         $arguments[] = $width;
@@ -103,13 +112,16 @@ $app['screenshot'] = $app->protect(function($url, &$width = 800, &$height = 600,
 
     $process = ProcessBuilder::create($arguments)->getProcess();
 
-    $processWaitTime = intval(getenv('PROCESS_WAIT_TIME'));
-    if ($processWaitTime > 0) {
-        $process->setTimeout(intval($timeout) + $processWaitTime);
-    }
+//    $processWaitTime = intval(getenv('PROCESS_WAIT_TIME'));
+//    if ($processWaitTime > 0) {
+//        $process->setTimeout(intval($timeout) + $processWaitTime);
+//    }
 
     try {
-        $process->run();
+        $ret = $process->run();
+        if ($ret == 137) { // Timeout binnary kill
+            throw new ProcessTimedOutException($process, ProcessTimedOutException::TYPE_GENERAL);
+        }
     } catch (ProcessTimedOutException $e) {
         throw new UnprocessableEntityHttpException('Process timeout', $e);
     }
